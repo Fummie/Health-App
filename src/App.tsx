@@ -678,7 +678,12 @@ export default function App() {
           )}
 
           {activeSegment === 'cycle' && (
-            <CycleSegment userGender={userProfile.gender} />
+            <CycleSegment 
+              userProfile={userProfile}
+              userGender={userProfile.gender}
+              onUpdateProfile={(updated) => setUserProfile(updated)}
+              onNavigateToNutrition={() => setActiveSegment('nutrition')}
+            />
           )}
 
           {activeSegment === 'emergency' && (

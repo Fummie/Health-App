@@ -47,7 +47,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onUpdateProfile,
   onOpenOnboarding,
 }) => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'family' | 'health'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'family' | 'partner' | 'health'>('profile');
   
   // Local editable form state initialized from current userProfile
   const [formData, setFormData] = useState<UserProfile>(() => ({
@@ -69,6 +69,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       householdDietaryNotes: '',
     }
   }));
+
+  // Partner Care state
+  const [partnerName, setPartnerName] = useState(formData.partnerInfo?.name || formData.familyInfo?.spouseName || '');
+  const [partnerRelationship, setPartnerRelationship] = useState(formData.partnerInfo?.relationship || 'Spouse / Life Partner');
+  const [partnerGender, setPartnerGender] = useState<Gender>(formData.partnerInfo?.gender || (formData.gender === 'female' ? 'male' : 'female'));
+  const [partnerCycleDay, setPartnerCycleDay] = useState<number>(formData.partnerInfo?.currentCycleDay || 21);
+  const [partnerMood, setPartnerMood] = useState<string>(formData.partnerInfo?.moodToday || 'Calm & tender');
+  const [partnerCareNotes, setPartnerCareNotes] = useState<string>(
+    formData.partnerInfo?.careNeeds?.join(', ') || 'Warm ginger tea, quiet evening, restorative back massage'
+  );
 
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [newChildName, setNewChildName] = useState('');
@@ -229,9 +239,36 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       }
     }
 
+    // Build partner info if name provided
+    let updatedPartner = formData.partnerInfo;
+    if (partnerName.trim()) {
+      updatedPartner = {
+        id: formData.partnerInfo?.id || 'partner-' + Date.now(),
+        name: partnerName.trim(),
+        relationship: partnerRelationship,
+        gender: partnerGender,
+        currentCycleDay: partnerCycleDay,
+        currentPhase: partnerGender === 'female' 
+          ? (partnerCycleDay <= 5 ? 'menstrual' : partnerCycleDay <= 12 ? 'follicular' : partnerCycleDay <= 16 ? 'ovulatory' : 'luteal')
+          : (partnerCycleDay <= 12 ? 'morning_peak' : 'evening_trough'),
+        moodToday: partnerMood,
+        symptomsToday: ['Tender lower back', 'Slight bloating'],
+        careNeeds: partnerCareNotes ? partnerCareNotes.split(',').map(s => s.trim()) : ['Warm comfort tea', 'Restorative evening'],
+        avoidList: ['High stress demands', 'Late night disruptions'],
+        recommendedMeal: 'Warm wild salmon & roasted butternut squash with turmeric bone broth',
+        lastUpdated: new Date().toISOString()
+      };
+      try {
+        localStorage.setItem('vitalis_partner_cycle_info', JSON.stringify(updatedPartner));
+      } catch (e) {
+        console.warn('Could not persist partner info', e);
+      }
+    }
+
     const updated: UserProfile = {
       ...formData,
       familyInfo: finalFamilyInfo,
+      partnerInfo: updatedPartner,
     };
 
     onUpdateProfile(updated);
@@ -305,6 +342,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             <Users className="w-3.5 h-3.5" />
             <span>Relationship & Family</span>
             {isMarried && (
+              <span className="w-2 h-2 rounded-full bg-[#A45C40]" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('partner')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold uppercase tracking-wider transition-all border-b-2 relative ${
+              activeTab === 'partner'
+                ? 'bg-[#FDFCFB] text-[#3A4D39] border-[#3A4D39] shadow-xs'
+                : 'text-[#6B7280] hover:text-[#2D2D2D] border-transparent'
+            }`}
+          >
+            <HeartHandshake className="w-3.5 h-3.5 text-[#A45C40]" />
+            <span>Partner & Cycle Sync</span>
+            {formData.partnerInfo && (
               <span className="w-2 h-2 rounded-full bg-[#A45C40]" />
             )}
           </button>
@@ -570,6 +622,39 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#3A4D39] text-white">
                   Normal Range
                 </span>
+              </div>
+
+              {/* Explicit Add Partner for this Profile Button / Card */}
+              <div className="p-4.5 bg-[#FAF8F5] rounded-3xl border border-[#E8E4DE] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-2xl bg-[#A45C40]/10 text-[#A45C40]">
+                    <HeartHandshake className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#2D2D2D] uppercase tracking-wider flex items-center gap-2">
+                      <span>{partnerName ? `Partner Linked: ${partnerName}` : 'Cycle Care Partner'}</span>
+                      {partnerName && (
+                        <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">
+                          Active Sync
+                        </span>
+                      )}
+                    </h4>
+                    <p className="text-[11px] text-[#6B7280]">
+                      {partnerName
+                        ? `Connected to mutual cycle sync, daily care tokens, and nutrition recommendations.`
+                        : `Connect a partner to share cycle phases, send restorative care tokens, and coordinate wellness.`}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('partner')}
+                  className="px-4 py-2 rounded-full bg-[#A45C40] hover:bg-[#8F4F36] text-white text-xs font-bold uppercase tracking-wider transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{partnerName ? 'Manage Partner Sync' : 'Add Partner for this Profile'}</span>
+                </button>
               </div>
             </div>
           )}
@@ -940,6 +1025,176 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   </p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB: Partner & Cycle Care Synchronization */}
+          {activeTab === 'partner' && (
+            <div className="space-y-6">
+              {/* Partner Overview Banner */}
+              <div className="bg-[#FAF8F5] p-6 rounded-3xl border border-[#E8E4DE] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-[#A45C40] bg-white px-2.5 py-0.5 rounded-full border border-[#E8E4DE]">
+                      Mutual Cycle & Care Alignment
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-serif italic text-[#2D2D2D]">
+                    Add Partner for this Profile
+                  </h3>
+                  <p className="text-xs text-[#6B7280] max-w-lg mt-0.5">
+                    Connect your partner to coordinate cycle phases, exchange restorative care tokens, and adapt daily nutrition and comfort.
+                  </p>
+                </div>
+
+                {partnerName && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPartnerName('');
+                      setFormData({ ...formData, partnerInfo: undefined });
+                      try {
+                        localStorage.removeItem('vitalis_partner_cycle_info');
+                      } catch (e) {
+                        console.warn(e);
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl border border-rose-200 text-rose-700 bg-rose-50 text-xs font-semibold hover:bg-rose-100 transition-colors self-start sm:self-auto"
+                  >
+                    Unlink Partner
+                  </button>
+                )}
+              </div>
+
+              {/* Partner Details Form */}
+              <div className="bg-white p-6 rounded-3xl border border-[#E8E4DE] space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Partner Name */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7C9070] mb-1.5">
+                      Partner's Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sarah Jenkins"
+                      value={partnerName}
+                      onChange={(e) => setPartnerName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E4DE] bg-[#FAF8F5] focus:ring-2 focus:ring-[#A45C40] text-sm text-[#2D2D2D] outline-hidden"
+                    />
+                  </div>
+
+                  {/* Relationship */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#7C9070] mb-1.5">
+                      Relationship Type
+                    </label>
+                    <select
+                      value={partnerRelationship}
+                      onChange={(e) => setPartnerRelationship(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E4DE] bg-[#FAF8F5] focus:ring-2 focus:ring-[#A45C40] text-sm text-[#2D2D2D] outline-hidden"
+                    >
+                      <option value="Spouse / Husband / Wife">Spouse / Husband / Wife</option>
+                      <option value="Fiancé / Fiancée">Fiancé / Fiancée</option>
+                      <option value="Long-term Life Partner">Long-term Life Partner</option>
+                      <option value="Romantic Companion">Romantic Companion</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Biological Rhythm / Gender */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#7C9070] mb-1.5">
+                    Partner's Biological Hormone System
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPartnerGender('female')}
+                      className={`p-3.5 rounded-2xl border text-left transition-all ${
+                        partnerGender === 'female'
+                          ? 'bg-[#FAF8F5] border-[#A45C40] ring-2 ring-[#A45C40]/20'
+                          : 'bg-white border-[#E8E4DE] hover:bg-[#FAF8F5]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-xs text-[#2D2D2D]">Female Infradian Rhythm</span>
+                        {partnerGender === 'female' && <Check className="w-4 h-4 text-[#A45C40]" />}
+                      </div>
+                      <p className="text-[11px] text-[#6B7280]">
+                        28-day monthly cyclical journey (Menstrual, Follicular, Ovulatory, Luteal phases).
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPartnerGender('male')}
+                      className={`p-3.5 rounded-2xl border text-left transition-all ${
+                        partnerGender === 'male'
+                          ? 'bg-[#FAF8F5] border-[#3A4D39] ring-2 ring-[#3A4D39]/20'
+                          : 'bg-white border-[#E8E4DE] hover:bg-[#FAF8F5]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-bold text-xs text-[#2D2D2D]">Male Diurnal Rhythm</span>
+                        {partnerGender === 'male' && <Check className="w-4 h-4 text-[#3A4D39]" />}
+                      </div>
+                      <p className="text-[11px] text-[#6B7280]">
+                        24-hour testosterone and cortisol diurnal cycle with morning surges and evening replenishment.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cycle Day or Status */}
+                {partnerGender === 'female' ? (
+                  <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#E8E4DE] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold uppercase tracking-wider text-[#2D2D2D]">
+                        Partner's Current Cycle Day: <span className="font-mono text-[#A45C40]">Day {partnerCycleDay}</span>
+                      </label>
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-rose-100 text-rose-800">
+                        {partnerCycleDay <= 5 ? 'Menstrual' : partnerCycleDay <= 12 ? 'Follicular' : partnerCycleDay <= 16 ? 'Ovulatory' : 'Luteal'} Phase
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="28"
+                      value={partnerCycleDay}
+                      onChange={(e) => setPartnerCycleDay(Number(e.target.value))}
+                      className="w-full accent-[#A45C40]"
+                    />
+                    <div className="flex justify-between text-[10px] text-[#6B7280]">
+                      <span>Day 1 (Period)</span>
+                      <span>Day 7 (Follicular)</span>
+                      <span>Day 14 (Ovulation)</span>
+                      <span>Day 28 (Luteal End)</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#E8E4DE] text-xs text-[#3A4D39]">
+                    <span className="font-bold block">Diurnal Alignment Active:</span>
+                    Partner will receive morning peak alerts (06:00 - 10:00) and evening recovery reminders.
+                  </div>
+                )}
+
+                {/* Care & Comfort Notes */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#7C9070] mb-1.5">
+                    Care & Comfort Preferences
+                  </label>
+                  <input
+                    type="text"
+                    value={partnerCareNotes}
+                    onChange={(e) => setPartnerCareNotes(e.target.value)}
+                    placeholder="e.g. Warm herbal tea, quiet evenings, gentle walks, back massage"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E4DE] bg-[#FAF8F5] text-xs text-[#2D2D2D] outline-hidden"
+                  />
+                  <p className="text-[10px] text-[#6B7280] mt-1">
+                    Used to power the Partner Care Hub with personalized recommendations and comfort meals.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 

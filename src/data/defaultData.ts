@@ -8,7 +8,8 @@ import {
   AIProtocol,
   NutritionLogItem,
   UserProfile,
-  AccessibilitySettings 
+  AccessibilitySettings,
+  PartnerCycleInfo
 } from '../types';
 
 export const PRESET_AVATARS = [
@@ -611,6 +612,39 @@ export const DEFAULT_EMERGENCY_PROFILE: EmergencyProfile = {
   lastUpdated: new Date().toISOString()
 };
 
+export const DEFAULT_PARTNER_INFO: PartnerCycleInfo = {
+  id: 'partner_default',
+  name: 'Sarah Jordan',
+  relationship: 'Life Partner',
+  gender: 'female',
+  currentCycleDay: 23,
+  currentPhase: 'Luteal Phase (Late)',
+  moodToday: 'Sensitive & Low Energy',
+  symptomsToday: ['Mild Cramping', 'Pelvic Heaviness', 'Back Tightness'],
+  careNeeds: [
+    'Warm ginger & chamomile tea with raw honey',
+    'Gentle encouragement, avoid demanding discussions tonight',
+    'Comfortable heating pad for lower back',
+    'Nutrient-dense dinner with warm complex carbohydrates'
+  ],
+  avoidList: [
+    'High-intensity late evening workouts',
+    'Last-minute crowded social events',
+    'Excessive cold drinks or processed salty snacks'
+  ],
+  recommendedMeal: 'Warm Spiced Coconut Golden Milk Nightcap & Quinoa Salmon Bowl',
+  lastUpdated: '15 mins ago',
+  receivedCareTokens: [
+    {
+      id: 'token_1',
+      from: 'You',
+      token: '🍵 Warm Chamomile Care',
+      message: 'Brewed fresh chamomile & ginger tea for you. Rest easy tonight!',
+      timestamp: 'Today at 3:15 PM'
+    }
+  ]
+};
+
 export const DEFAULT_FEMALE_CYCLE: FemaleCycleData = {
   lastPeriodStartDate: new Date(Date.now() - 3600000 * 24 * 12).toISOString().split('T')[0],
   cycleLengthDays: 28,
@@ -619,6 +653,7 @@ export const DEFAULT_FEMALE_CYCLE: FemaleCycleData = {
   currentPhase: 'ovulatory',
   daysUntilNextPeriod: 15,
   fertilityStatus: 'peak',
+  majorCycleBeganToday: false,
   symptoms: {
     cramps: 1,
     mood: 'High Energy & Focused',
@@ -634,7 +669,31 @@ export const DEFAULT_FEMALE_CYCLE: FemaleCycleData = {
   phaseWorkoutTips: [
     'Strength and power potential are at their monthly peak—ideal time for PR attempts or HIIT.',
     'Estrogen increases ligament laxity; ensure thorough warm-ups for knee and ankle stability.'
-  ]
+  ],
+  dailyLogs: {
+    1: {
+      cycleDay: 1,
+      date: new Date(Date.now() - 3600000 * 24 * 12).toISOString().split('T')[0],
+      majorCycleBegan: true,
+      crampsLevel: 3,
+      flow: 'medium',
+      symptoms: ['Pelvic Cramps', 'Lower Back Tightness'],
+      moods: ['Reflective', 'Fatigued'],
+      energyLevel: 2,
+      notes: 'Cycle started in the morning. Soothed with warm herbal tea.'
+    },
+    13: {
+      cycleDay: 13,
+      date: new Date().toISOString().split('T')[0],
+      majorCycleBegan: false,
+      crampsLevel: 0,
+      flow: 'none',
+      symptoms: ['Mild Ovulatory Twinge', 'Optimal Alertness'],
+      moods: ['Confident', 'Focused', 'High Energy'],
+      energyLevel: 5,
+      notes: 'Peak vitality day. Great workout performance.'
+    }
+  }
 };
 
 export const DEFAULT_MALE_TESTOSTERONE: MaleTestosteroneData = {

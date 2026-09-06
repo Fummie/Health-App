@@ -37,7 +37,14 @@ export const NutritionRecipesSegment: React.FC<NutritionRecipesSegmentProps> = (
 }) => {
   const [activeTab, setActiveTab] = useState<'recipes' | 'tracker' | 'ai_generator'>('recipes');
   const [recipes, setRecipes] = useState<Recipe[]>(CURATED_RECIPES);
-  const [nutritionLogs, setNutritionLogs] = useState<NutritionLogItem[]>(INITIAL_NUTRITION_LOGS);
+  const [nutritionLogs, setNutritionLogs] = useState<NutritionLogItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('vitalis_nutrition_logs');
+      return saved ? JSON.parse(saved) : INITIAL_NUTRITION_LOGS;
+    } catch {
+      return INITIAL_NUTRITION_LOGS;
+    }
+  });
   const [waterGlasses, setWaterGlasses] = useState<number>(6); // 250ml each = 1.5L
   
   // Filters for recipe browser
@@ -145,7 +152,13 @@ export const NutritionRecipesSegment: React.FC<NutritionRecipesSegmentProps> = (
   };
 
   const handleSaveLog = (newLog: NutritionLogItem) => {
-    setNutritionLogs([newLog, ...nutritionLogs]);
+    const updated = [newLog, ...nutritionLogs];
+    setNutritionLogs(updated);
+    try {
+      localStorage.setItem('vitalis_nutrition_logs', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Could not persist nutrition logs', e);
+    }
   };
 
   const handleGenerateRecipe = async (e: React.FormEvent) => {

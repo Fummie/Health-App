@@ -66,6 +66,7 @@ export interface UserProfile {
   dietaryPreference: DietaryPreference;
   relationshipStatus?: RelationshipStatus;
   familyInfo?: FamilyInformation;
+  partnerInfo?: PartnerCycleInfo;
   isOnboarded: boolean;
   createdAt: string;
   syncEnabled?: boolean;
@@ -216,6 +217,43 @@ export interface DoctorUpdate {
 // Female Cycle Tracking
 export type MenstrualPhase = 'menstrual' | 'follicular' | 'ovulatory' | 'luteal';
 
+export interface DailyCycleLog {
+  cycleDay: number;
+  date: string; // e.g. "2026-09-06"
+  majorCycleBegan: boolean;
+  crampsLevel: number; // 0 to 5
+  flow: 'none' | 'spotting' | 'light' | 'medium' | 'heavy';
+  symptoms: string[];
+  moods: string[];
+  energyLevel: number; // 1 to 5
+  notes?: string;
+  nutritionPreparednessScore?: number;
+}
+
+export interface PartnerCareToken {
+  id: string;
+  from: string;
+  token: string;
+  message: string;
+  timestamp: string;
+}
+
+export interface PartnerCycleInfo {
+  id: string;
+  name: string;
+  relationship: string;
+  gender: Gender;
+  currentCycleDay?: number;
+  currentPhase?: string;
+  moodToday?: string;
+  symptomsToday?: string[];
+  careNeeds?: string[];
+  avoidList?: string[];
+  recommendedMeal?: string;
+  lastUpdated?: string;
+  receivedCareTokens?: PartnerCareToken[];
+}
+
 export interface FemaleCycleData {
   lastPeriodStartDate: string;
   cycleLengthDays: number;
@@ -224,6 +262,7 @@ export interface FemaleCycleData {
   currentPhase: MenstrualPhase;
   daysUntilNextPeriod: number;
   fertilityStatus: 'low' | 'medium' | 'peak';
+  majorCycleBeganToday: boolean;
   symptoms: {
     cramps: number; // 0 to 5
     mood: string;
@@ -233,6 +272,38 @@ export interface FemaleCycleData {
   };
   phaseNutritionTips: string[];
   phaseWorkoutTips: string[];
+  dailyLogs?: Record<number, DailyCycleLog>;
+  isIrregular?: boolean;
+  cycleLengthVarianceDays?: number;
+  diagnosedStageOverride?: MenstrualPhase;
+  diagnosedStageConfidence?: number;
+  irregularityCause?: 'pcos' | 'stress' | 'postpartum' | 'perimenopause' | 'travel' | 'idiopathic';
+}
+
+export interface CyclePredictionPhase {
+  phase: MenstrualPhase;
+  name: string;
+  startDate: string; // ISO date format "YYYY-MM-DD"
+  endDate: string;
+  confidencePercent: number;
+  keySigns: string[];
+  recommendedNutrition: string[];
+  recommendedActivity: string;
+}
+
+export interface CyclePrediction {
+  cycleNumber: number;
+  estimatedStartDate: string;
+  estimatedEndDate: string;
+  cycleLength: number;
+  isIrregularVariation: boolean;
+  ovulationWindow: {
+    peakDay: string;
+    windowStart: string;
+    windowEnd: string;
+    fertilityProbability: 'peak' | 'high' | 'moderate' | 'low';
+  };
+  phases: CyclePredictionPhase[];
 }
 
 // Male Endocrine / Testosterone Tracking
