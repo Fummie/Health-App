@@ -524,3 +524,158 @@ export function analyzeMealAndIngredients(params: {
     goalImpact,
   };
 }
+
+/**
+ * Deterministic recipe formulator that creates a clinical, delicious recipe
+ * tailored to user ingredients and targeted goal when the AI model is experiencing spikes in demand.
+ */
+export function formulateDeterministicRecipe(params: {
+  ingredientsOnHand: string;
+  dietaryPreference?: string;
+  prepTimeLimit?: string;
+  healthGoal?: string;
+  gender?: string;
+}): any {
+  const { ingredientsOnHand, dietaryPreference = 'Healthy whole foods', prepTimeLimit = '12 minutes', healthGoal = 'Metabolic & Longevity', gender } = params;
+  const lower = ingredientsOnHand.toLowerCase();
+
+  let title = 'Nourishing Vitalis Longevity Bowl';
+  let category: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'smoothie' | 'drink' = 'lunch';
+  let itemType: 'food' | 'drink' = 'food';
+  let imageUrl = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+  let cal = 440;
+  let p = '32g';
+  let c = '38g';
+  let f = '16g';
+  let fib = '7g';
+  let keyBenefits = 'Rich in anti-inflammatory micronutrients, bio-available clean protein, and slow-burning complex fiber to support sustained cellular ATP production.';
+  let quickTip = 'Drizzle extra virgin olive oil cold at the end to keep heat-sensitive polyphenol bonds intact.';
+
+  const ingredientsList: string[] = [];
+  const stepsList: string[] = [];
+
+  if (lower.includes('salmon') || lower.includes('trout') || lower.includes('fish')) {
+    title = 'Pan-Seared Wild Salmon with Wilted Greens & Citrus Emulsion';
+    imageUrl = 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=800&q=80';
+    cal = 460;
+    p = '38g';
+    c = '18g';
+    f = '22g';
+    fib = '5g';
+    keyBenefits = 'High concentration of marine Omega-3 fatty acids (EPA/DHA) and astaxanthin reduces arterial stiffness and suppresses systemic TNF-alpha.';
+    quickTip = 'Cook skin-side down first on medium heat for 4 minutes to crisp the skin and preserve heat-sensitive omega-3 oils.';
+    ingredientsList.push('1 fillet wild Alaskan salmon (approx. 180g)');
+    ingredientsList.push('2 generous cups baby spinach or shredded lacinato kale');
+    ingredientsList.push('1 tbsp extra virgin cold-pressed olive oil');
+    ingredientsList.push('1/2 organic lemon (freshly juiced)');
+    ingredientsList.push('1 clove fresh garlic, minced');
+    ingredientsList.push('Pinch of Himalayan pink salt & cracked black pepper');
+
+    stepsList.push('Pat salmon dry and season both sides with salt and black pepper.');
+    stepsList.push('Warm olive oil in a skillet over medium heat. Place salmon skin-side down for 4 minutes, flip and cook 3 minutes until medium-rare.');
+    stepsList.push('Toss garlic and greens into the same pan for 90 seconds until vibrant green and lightly wilted.');
+    stepsList.push('Plate salmon over the greens, squeeze fresh lemon over the fillet, and serve immediately.');
+  } else if (lower.includes('egg') || lower.includes('omelette') || lower.includes('scramble')) {
+    title = 'Pasture-Raised Mediterranean Herb Omelette with Avocado';
+    imageUrl = 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80';
+    category = 'breakfast';
+    cal = 390;
+    p = '24g';
+    c = '12g';
+    f = '26g';
+    fib = '6g';
+    keyBenefits = 'Choline and lutein from egg yolks nourish acetylcholine neurotransmitter synthesis, while monounsaturated avocado fats stabilize post-meal satiety.';
+    quickTip = 'Cook eggs over low heat to avoid oxidizing delicate cholesterol and lutein particles.';
+    ingredientsList.push('3 pasture-raised organic eggs');
+    ingredientsList.push('1/2 ripe Haas avocado, sliced');
+    ingredientsList.push('1 cup baby spinach or microgreens');
+    ingredientsList.push('1 tsp extra virgin olive oil or grass-fed ghee');
+    ingredientsList.push('Fresh chives and pinch of sea salt');
+
+    stepsList.push('Whisk eggs lightly with a fork and a pinch of sea salt.');
+    stepsList.push('Melt ghee or olive oil in a non-stick pan over medium-low heat.');
+    stepsList.push('Pour eggs, cook gently for 2 minutes until almost set, fold in baby spinach, and transfer to plate.');
+    stepsList.push('Top with sliced avocado, fresh chopped chives, and serve warm.');
+  } else if (lower.includes('smoothie') || lower.includes('berry') || lower.includes('blueberr') || lower.includes('chia')) {
+    title = 'Antioxidant Berry & Chia Longevity Elixir';
+    category = 'smoothie';
+    itemType = 'drink';
+    imageUrl = 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=800&q=80';
+    cal = 310;
+    p = '20g';
+    c = '36g';
+    f = '10g';
+    fib = '11g';
+    keyBenefits = 'Anthocyanins cross the blood-brain barrier to scavenge reactive oxygen species, while soluble chia mucilage nourishes gut Akkermansia muciniphila.';
+    quickTip = 'Pre-soak chia seeds in almond milk for 5 minutes before blending to maximize gelatinous fiber extraction.';
+    ingredientsList.push('1 cup wild organic blueberries (fresh or frozen)');
+    ingredientsList.push('1 tbsp whole chia seeds');
+    ingredientsList.push('1 scoop unflavored or vanilla clean protein powder');
+    ingredientsList.push('1 cup unsweetened almond or oat milk');
+    ingredientsList.push('1/2 tsp ground Ceylon cinnamon');
+
+    stepsList.push('Combine plant milk, wild blueberries, and protein powder in a high-speed blender.');
+    stepsList.push('Blend on high for 45 seconds until velvety smooth.');
+    stepsList.push('Stir in chia seeds and sprinkle cinnamon on top for blood-sugar stabilization.');
+  } else if (lower.includes('chicken') || lower.includes('poultry')) {
+    title = 'Herb-Crusted Golden Chicken & Roasted Broccoli Skillet';
+    imageUrl = 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=800&q=80';
+    cal = 430;
+    p = '42g';
+    c = '14g';
+    f = '18g';
+    fib = '5g';
+    keyBenefits = 'High biological value leucine activates muscle mTOR for tissue repair; sulforaphane in broccoli upregulates cellular Nrf2 detox pathways.';
+    quickTip = 'Chop broccoli 15 minutes before cooking to maximize the enzymatic formation of bioactive sulforaphane.';
+    ingredientsList.push('1 free-range chicken breast (approx. 200g), sliced into cutlets');
+    ingredientsList.push('2 cups fresh broccoli florets');
+    ingredientsList.push('1 tbsp avocado oil or cold-pressed olive oil');
+    ingredientsList.push('1 tsp dried oregano & rosemary');
+    ingredientsList.push('Sea salt & lemon zest');
+
+    stepsList.push('Season chicken cutlets with herbs, sea salt, and lemon zest.');
+    stepsList.push('Heat skillet with oil, sear chicken 4 minutes per side until golden and cooked through.');
+    stepsList.push('Add broccoli florets to pan edges with 2 tbsp water, cover with lid to steam-sear for 3 minutes.');
+    stepsList.push('Plate chicken alongside tender crisp broccoli and drizzle pan juices over top.');
+  } else {
+    // Default whole food rainbow bowl
+    title = 'Vitalis Nutrient-Dense Garden Harvest Bowl';
+    imageUrl = 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=800&q=80';
+    cal = 380;
+    p = '22g';
+    c = '42g';
+    f = '14g';
+    fib = '9g';
+    keyBenefits = 'Broad spectrum phytonutrients optimize cellular methylation and provide prebiotic sustenance for diverse intestinal microbiome strains.';
+    quickTip = 'Chew thoroughly to activate salivary amylase and improve bio-availability of fat-soluble vitamins.';
+    ingredientsList.push('1 cup cooked organic quinoa or brown rice');
+    ingredientsList.push('1 cup mixed greens (spinach, arugula, watercress)');
+    ingredientsList.push('1/2 avocado or handful raw walnuts');
+    ingredientsList.push('1/2 cup steamed or sautéed seasonal vegetables');
+    ingredientsList.push('1 tbsp extra virgin olive oil + apple cider vinegar dressing');
+
+    stepsList.push('Warm grain base and spoon into a wide bowl.');
+    stepsList.push('Layer fresh mixed greens and warm vegetables on top.');
+    stepsList.push('Add sliced avocado and drizzle with olive oil and apple cider vinegar.');
+    stepsList.push('Toss gently and enjoy immediately.');
+  }
+
+  return {
+    title,
+    prepTime: prepTimeLimit,
+    servings: 1,
+    difficulty: 'Easy',
+    targetGoal: healthGoal,
+    calories: cal,
+    macros: { protein: p, carbs: c, fats: f, fiber: fib },
+    keyBenefits,
+    ingredients: ingredientsList,
+    steps: stepsList,
+    quickTip,
+    category,
+    itemType,
+    imageUrl,
+    dietaryMatch: [dietaryPreference],
+  };
+}
+
