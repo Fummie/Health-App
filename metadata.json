@@ -1,0 +1,6 @@
+{
+  "name": "Vitalis Health AI",
+  "description": "AI-customized health management with vitals tracking, step health benefits, sleep routine & nocturnal acoustic tracking, nutrition & recipe generator, cycle tracking, Bluetooth wearables, emergency doctor link, and accessibility features.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

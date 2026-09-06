@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-dyslexia: 'Atkinson Hyperlegible', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: #2D2D2D;
+    background-color: #FDFCFB;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Accessibility: Dyslexia-friendly typography mode */
+.dyslexia-mode {
+  font-family: var(--font-dyslexia) !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.1em !important;
+  line-height: 1.75 !important;
+}
+
+/* Accessibility: High-contrast mode (WCAG AAA compliant) */
+.high-contrast-mode {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast-mode .bg-white,
+.high-contrast-mode .bg-stone-50,
+.high-contrast-mode .bg-emerald-50,
+.high-contrast-mode .bg-slate-50 {
+  background-color: #121212 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+.high-contrast-mode .text-slate-600,
+.high-contrast-mode .text-slate-500,
+.high-contrast-mode .text-emerald-800,
+.high-contrast-mode .text-stone-600 {
+  color: #e0e0e0 !important;
+}
+
+.high-contrast-mode button {
+  border: 2px solid #ffffff !important;
+}
+
+/* Accessibility: Font Scaling */
+.text-scale-large {
+  font-size: 115% !important;
+}
+
+.text-scale-xlarge {
+  font-size: 130% !important;
+}
+
+/* Reduced motion support */
+.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Minimum 44px touch targets on interactive controls */
+.accessible-target {
+  min-height: 44px;
+  min-width: 44px;
+}
