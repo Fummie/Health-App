@@ -249,7 +249,75 @@ Return ONLY valid JSON with this schema:
   }
 });
 
-// 5. AI Health Assistant / Concierge Chat
+// 5. AI Meal & Drink Ingredients Consumption & Goal Impact Analysis
+app.post('/api/ai/analyze-meal', async (req: Request, res: Response) => {
+  try {
+    const { mealName, mealType, ingredients, userGoal, userProfile, beverageCategory } = req.body;
+    const ai = getGeminiClient();
+
+    if (!ai) {
+      // Deterministic fallback handled on client/server
+      return res.json({
+        success: true,
+        source: 'fallback',
+      });
+    }
+
+    const prompt = `You are a clinical nutritionist, metabolic researcher, and preventative medicine specialist.
+A client has just consumed a meal or drink (other than pure water) with the following details:
+- Name: "${mealName}"
+- Type: ${mealType} ${beverageCategory ? `(${beverageCategory})` : ''}
+- Major Ingredients Used to Prepare: ${JSON.stringify(ingredients)}
+- Client's Targeted Goal: "${userGoal}"
+- Client Profile: Gender: ${userProfile?.gender || 'unspecified'}, Age: ${userProfile?.age || 30}, Weight: ${userProfile?.weightKg || 65}kg, Dietary Preference: ${userProfile?.dietaryPreference || 'healthy whole-food'}
+
+Perform a rigorous clinical analysis:
+1. State exactly what was consumed based on these major ingredients.
+2. Estimate realistic nutritional metrics (calories, protein in grams, carbs in grams, fats in grams, fiber in grams).
+3. Evaluate its specific physiological effect on the client's TARGETED RESULT (${userGoal}):
+   - How does it affect hormones (insulin, cortisol, ghrelin, leptin, etc.)?
+   - How does it affect cellular energy, inflammation, or recovery?
+   - What is the alignment score (0-100%) and verdict ("optimal", "supportive", "moderate", "caution")?
+4. Identify 3-4 key bioactive nutrients or phytochemicals from these ingredients (e.g. Omega-3, EGCG, Curcumin, Sulforaphane, L-Theanine, Choline, Resveratrol, etc.).
+5. Provide 1 actionable clinical optimization tip for better results according to their plan.
+
+Return ONLY valid JSON matching this schema:
+{
+  "consumedSummary": "Clear 1-2 sentence description of what was consumed from these ingredients",
+  "calories": number,
+  "protein": number,
+  "carbs": number,
+  "fats": number,
+  "fiber": number,
+  "glycemicImpact": "Low" | "Moderate" | "High",
+  "goalImpact": {
+    "goal": "${userGoal}",
+    "alignmentScore": number (0 to 100),
+    "verdict": "optimal" | "supportive" | "moderate" | "caution",
+    "summaryEffect": "Specific explanation of how this meal/drink directly impacts their targeted result (${userGoal})",
+    "physiologicalMechanisms": ["Specific biological pathway 1", "Specific biological pathway 2"],
+    "keyNutrientsIdentified": ["Nutrient 1", "Nutrient 2", "Nutrient 3"],
+    "optimizationTip": "Actionable clinical tip to maximize results for this goal"
+  }
+}`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+      },
+    });
+
+    const parsed = JSON.parse(response.text?.trim() || '{}');
+    return res.json({ success: true, source: 'gemini', analysis: parsed });
+  } catch (error: any) {
+    console.error('Error in /api/ai/analyze-meal:', error);
+    return res.json({ success: false, error: error.message });
+  }
+});
+
+// 6. AI Health Assistant / Concierge Chat
 app.post('/api/ai/assistant', async (req: Request, res: Response) => {
   try {
     const { messages, userContext } = req.body;

@@ -124,9 +124,21 @@ export interface DailyStepData {
   isPedometerActive: boolean;
 }
 
+export type NutritionMealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'drink';
+
+export interface GoalImpactAnalysis {
+  goal: HealthGoal | string;
+  alignmentScore: number; // 0 to 100
+  verdict: 'optimal' | 'supportive' | 'moderate' | 'caution';
+  summaryEffect: string; // Concise explanation of effect on targeted result
+  physiologicalMechanisms: string[]; // Specific biological pathways
+  keyNutrientsIdentified: string[]; // Bioactive nutrients
+  optimizationTip: string; // Clinical / dietary bio-hack
+}
+
 export interface NutritionLogItem {
   id: string;
-  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  mealType: NutritionMealType;
   name: string;
   calories: number;
   proteinGrams: number;
@@ -134,6 +146,12 @@ export interface NutritionLogItem {
   fatGrams: number;
   fiberGrams?: number;
   timestamp: string;
+  majorIngredients?: string[];
+  consumedSummary?: string;
+  goalImpact?: GoalImpactAnalysis;
+  itemType?: 'meal' | 'drink';
+  beverageCategory?: 'tea' | 'coffee' | 'smoothie' | 'juice' | 'protein_shake' | 'elixir' | 'other';
+  imageUrl?: string;
 }
 
 export interface Recipe {
@@ -143,6 +161,7 @@ export interface Recipe {
   servings: number;
   difficulty: 'Easy' | 'Medium';
   targetGoal: string;
+  planCategory?: HealthGoal | 'general';
   calories: number;
   macros: {
     protein: string;
@@ -155,7 +174,10 @@ export interface Recipe {
   steps: string[];
   quickTip: string;
   isAiGenerated?: boolean;
-  category: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'smoothie';
+  category: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'smoothie' | 'drink';
+  itemType?: 'food' | 'drink';
+  imageUrl?: string;
+  dietaryMatch?: string[];
 }
 
 export interface EmergencyProfile {
